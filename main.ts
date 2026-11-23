@@ -18,6 +18,21 @@ import { join } from "node:path";
 const ROAST =
   "My wireless earbuds pause my music every time I chew, so lunch now comes with ad breaks.";
 
+// Guard: enforce the competition gate before writing — the roast must be a
+// single line of 1-200 characters, non-whitespace, and valid UTF-8. This
+// fails loudly instead of writing an entry the gate would reject.
+const roastBytes = Buffer.from(ROAST, "utf8");
+if (
+  ROAST.length < 1 ||
+  ROAST.length > 200 ||
+  ROAST.trim().length === 0 ||
+  ROAST.includes("\n") ||
+  ROAST.includes("\r") ||
+  roastBytes.toString("utf8") !== ROAST
+) {
+  throw new Error("roast line fails the 1-200 character single-line gate");
+}
+
 const outDir = process.env.OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, "entry.txt"), ROAST, "utf8");
